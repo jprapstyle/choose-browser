@@ -1,3 +1,5 @@
+[English](build-and-validation_EN.md)
+
 # 빌드 및 검증
 
 ## 이번 작업 결과 (2026-10-29)
@@ -33,8 +35,8 @@ $env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
 - 앱 APK: `app/build/outputs/apk/alpha/app-alpha.apk`
 - 기기 테스트 APK: `app/build/outputs/apk/androidTest/alpha/app-alpha-androidTest.apk`
 - Lint 상세: `app/build/reports/lint-results-alpha.html`
-- 이번 실행 로그: [build-validation.log](build-validation.log)
+- 이번 실행 로그: `build-validation.log` (로컬 전용, Git 추적 제외)
 
 기기 테스트를 실행할 경우 별도 테스트 기기에서 `connectedAlphaAndroidTest`를 사용합니다. 기존 설치 앱과 테스트 대상의 패키지·서명을 먼저 확인해야 합니다.
 
-후속 배포 및 설치·GitHub 반영 기록은 [배포 기록](releases.md)을 참조합니다. 로컬 빌드 로그 링크는 이 PC에서만 유효하며 로그 파일은 Git 추적 대상이 아닙니다.
+후속 배포 및 설치·GitHub 반영 기록은 [배포 기록](releases_KR.md)을 참조합니다. 로컬 빌드 로그 링크는 이 PC에서만 유효하며 로그 파일은 Git 추적 대상이 아닙니다.

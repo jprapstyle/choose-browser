@@ -1,3 +1,5 @@
+[English](local-changes_EN.md)
+
 # 로컬 개선 사항 적용 내역
 
 ## 기준과 적용 범위
@@ -6,8 +8,6 @@
 - 저장소: https://github.com/jprapstyle/choose-browser
 - 원본: https://github.com/felixb/choose-browser
 - 복제 기준: `fa01bd9e3e5dd254562eddaaa576868b3bd53fc0` (`prepare release 1.3`, 2022-02-04)
-- 이식한 작업본: `C:/Users/enLioN/Personal_Project/ChooseBrowser_fork`
-- 대상: `C:/Users/enLioN/Personal_Project/choose-browser`
 - 비교 당시 두 GitHub master와 기존 로컬 원본의 HEAD는 동일합니다. 이후 원본 업데이트를 병합한 작업은 아닙니다.
 - 기존 파일과 추가된 소스·리소스·테스트 및 Gradle wrapper를 반영했습니다. 빌드 산출물, `.gradle`, `work`의 임시 스크립트·기기 백업·로그는 이식하지 않았습니다.
 - `local.properties`는 이 PC의 빌드용으로만 복사했으며 Git 추적 대상이 아닙니다.
@@ -37,7 +37,7 @@
 - Java 17, Android Gradle Plugin 9.3.2, Gradle 9.5.0
 - alpha applicationId: `de.ub0r.android.choosebrowser.alpha`
 - alpha 표시 버전: `1.3-enlion.1-alpha.1` (`versionCode` 230013001)
-- 정식 버전: `1.3-enlion.1`. [버전 규칙](versioning.md)을 따릅니다. 이전 이식 당시에는 `1.3-ALPHA-perf1` / 230013000이었습니다.
+- 정식 버전: `1.3-enlion.1`. [버전 규칙](versioning_KR.md)을 따릅니다. 이전 이식 당시에는 `1.3-ALPHA-perf1` / 230013000이었습니다.
 - 기존 debug/release applicationId는 `de.ub0r.android.choosebrowser`입니다.
 - URL 파싱·리디렉션·취소·필터 관련 회귀 테스트와 기존 기기 테스트 수정을 반영했습니다.
 - 누락 번역 Lint 검사는 기존 작업본처럼 비활성화되어 있으며 모든 언어의 완전 번역을 의미하지 않습니다.
