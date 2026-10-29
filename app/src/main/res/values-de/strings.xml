@@ -14,4 +14,8 @@
     <string name="preferred_apps">Gespeicherte Apps</string>
     <string name="manage_preferred_apps">Gespeicherte Apps verwalten</string>
     <string name="preferred_apps_empty_list">Füge gespeicherte Apps hinzu indem du sie mit "Browser Wählen" startest</string>
+
+    <string name="hidden_apps">Versteckte Apps</string>
+    <string name="manage_hidden_apps">Markierte Apps werden in der Browserliste nicht angezeigt</string>
+    <string name="hidden_apps_empty_list">Keine Apps gefunden, die Links öffnen können</string>
 </resources>

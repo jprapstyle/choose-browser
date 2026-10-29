@@ -3,10 +3,10 @@ package de.ub0r.android.choosebrowser;
 import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
-import androidx.test.rule.ActivityTestRule;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import org.junit.Rule;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -19,9 +19,7 @@ public class IntentParserInstrumentedTest {
     private static final String EXPECTED_URL = "http://example.com/url";
     private final IntentParser mParser = new IntentParser();
 
-    @Rule
-    public ActivityTestRule<ChooserActivity> mActivityRule =
-            new ActivityTestRule<>(ChooserActivity.class);
+
 
     @Test
     public void parseIntentWithData() throws Exception {

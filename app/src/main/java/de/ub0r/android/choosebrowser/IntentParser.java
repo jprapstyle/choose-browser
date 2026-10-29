@@ -3,125 +3,121 @@ package de.ub0r.android.choosebrowser;
 import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
-
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import de.ub0r.android.logg0r.Log;
+import okhttp3.Call;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import static java.util.Arrays.asList;
-import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+/** Local parsing never performs network I/O. Expansion belongs to a cancellable worker. */
 class IntentParser {
-    private final static String TAG = "IntentParser";
-    private static final OkHttpClient httpClient =
-            new OkHttpClient.Builder().callTimeout(3, SECONDS).followRedirects(false).build();
-    private static final ExecutorService executor = newFixedThreadPool(3);
-    private static final List<String> shorteners = asList(
-            "bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "tiny.cc", "bit.do", "cut.ly"
-    );
-    private static final Pattern mPattern = Pattern.compile("https?://[^\\s]*");
+    private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
+            .callTimeout(3, SECONDS).followRedirects(false).followSslRedirects(false).build();
+    private static final Set<String> SHORTENERS = new HashSet<>(Arrays.asList(
+            "bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "tiny.cc", "bit.do", "cut.ly"));
+    private static final Pattern URL = Pattern.compile("https?://[^\\s]+", Pattern.CASE_INSENSITIVE);
+    private volatile Call activeCall;
+    private volatile boolean cancelled;
 
-    Uri parseIntent(@NonNull final Intent intent) {
-        final Uri data = intent.getData();
-        Log.d(TAG, "parsing intent with action %s, data %s", intent.getAction(), data);
-
-        Uri parsed = null;
-
-        if (data != null && data.getScheme() != null && data.getScheme().startsWith("http")) {
-            parsed = data;
-        } else if (intent.hasExtra(Intent.EXTRA_TEXT)) {
-            final String url = parseText(intent.getStringExtra(Intent.EXTRA_TEXT));
-            if (url != null) {
-                parsed = Uri.parse(url);
-            }
-        } else if (intent.getClipData() != null) {
-            parsed = parseClipData(intent.getClipData());
-        }
-
-        return resolveRedirect(parsed);
+    Uri parseIntent(@NonNull Intent intent) {
+        Uri parsed = validUri(intent.getData()) ? intent.getData() : null;
+        if (parsed == null) parsed = uriOrNull(parseText(intent.getCharSequenceExtra(Intent.EXTRA_TEXT)));
+        if (parsed == null && intent.getClipData() != null) parsed = parseClipData(intent.getClipData());
+        return extractGoogleRedirect(parsed);
     }
 
-    private Uri parseClipData(@NonNull final ClipData clipData) {
-        if (clipData.getItemCount() == 0) {
-            return null;
-        }
-        final ClipData.Item item = clipData.getItemAt(0);
-
-        if (item.getText() != null) {
-            return uriOrNull(parseText(item.getText()));
-        }
-
-        if (item.getUri() != null) {
-            if (item.getUri().getScheme() != null && item.getUri().getScheme().startsWith("http")) {
-                return item.getUri();
-            }
-        }
-
-        return null;
-    }
-
-    String parseText(@Nullable final CharSequence text) {
-        final Matcher matcher = mPattern.matcher(text);
-        if (matcher.find()) {
-            return text.subSequence(matcher.start(), matcher.end()).toString();
-        } else {
-            return null;
-        }
-    }
-
-    private Uri uriOrNull(@Nullable final String url) {
-        if (url != null) {
-            return Uri.parse(url);
+    private Uri parseClipData(ClipData data) {
+        for (int i = 0; i < data.getItemCount(); i++) {
+            ClipData.Item item = data.getItemAt(i);
+            if (validUri(item.getUri())) return item.getUri();
+            Uri parsed = uriOrNull(parseText(item.getText()));
+            if (parsed != null) return parsed;
         }
         return null;
     }
 
-    Uri resolveRedirect(@Nullable final Uri uri) {
-        Uri redirect = uri;
+    String parseText(@Nullable CharSequence text) {
+        if (text == null) return null;
+        Matcher matcher = URL.matcher(text);
+        if (!matcher.find()) return null;
+        String candidate = text.subSequence(matcher.start(), matcher.end()).toString();
+        return validUri(Uri.parse(candidate)) ? candidate : null;
+    }
 
+    private Uri uriOrNull(String text) { return text == null ? null : Uri.parse(text); }
+
+    private Uri extractGoogleRedirect(Uri uri) {
+        if (!validUri(uri)) return null;
+        String host = uri.getHost().toLowerCase(Locale.ROOT);
+        if ((host.equals("google.com") || host.endsWith(".google.com")) && "/url".equals(uri.getPath())) {
+            String target = uri.getQueryParameter("q");
+            if (target == null) target = uri.getQueryParameter("url");
+            Uri result = uriOrNull(target);
+            if (validUri(result)) return result;
+        }
+        return uri;
+    }
+
+    boolean needsNetwork(Uri uri) {
+        return validUri(uri) && SHORTENERS.contains(uri.getHost().toLowerCase(Locale.ROOT));
+    }
+
+    Uri resolveRedirect(@Nullable Uri uri) {
+        Uri redirect = extractGoogleRedirect(uri);
+        if (!needsNetwork(redirect)) return redirect;
+        if (Looper.myLooper() == Looper.getMainLooper())
+            throw new IllegalStateException("Resolve redirects off the UI thread");
+        if (cancelled || Thread.currentThread().isInterrupted()) return redirect;
         try {
-            if (validUri(uri) && uri.getHost().endsWith("google.com") && uri.getEncodedPath().equals("/url") && uri.getQueryParameter("q") != null) {
-                redirect = Uri.parse(uri.getQueryParameter("q"));
-                Log.d(TAG, "Extracting %s from %s", redirect, uri);
-            }
-
-            if (validUri(redirect) && shorteners.contains(redirect.getHost())) {
-                final Request request =
-                        new Request.Builder().url(uri.toString().replace("http:", "https:")).head().build();
-                String location = doHttp(request).header("location");
-                if (location != null) {
-                    redirect = Uri.parse(location);
-                    Log.d(TAG, "Extracting %s from %s", redirect, uri);
+            Uri requestUri = redirect.buildUpon().scheme("https").build();
+            Request request = new Request.Builder().url(requestUri.toString()).head().build();
+            try (Response response = doHttp(request)) {
+                if (cancelled) return redirect;
+                String location = response.header("Location");
+                if (response.code() >= 300 && response.code() < 400 && location != null) {
+                    HttpUrl target = response.request().url().resolve(location);
+                    if (target != null) {
+                        Uri parsed = Uri.parse(target.toString());
+                        if (validUri(parsed)) redirect = parsed;
+                    }
                 }
             }
-        } catch (Exception e) {
-            Log.i(TAG, "Could not resolve " + uri, e);
+        } catch (IOException | IllegalArgumentException ignored) {
+            // Keep the usable input when a shortener times out or rejects HEAD.
         }
         return redirect;
     }
 
-    boolean validUri(@Nullable final Uri uri) {
-        return uri != null && uri.getHost() != null && uri.getEncodedPath() != null && uri.getEncodedPath().length() > 1;
+    boolean validUri(@Nullable Uri uri) {
+        return uri != null && uri.isHierarchical() && uri.getHost() != null && !uri.getHost().isEmpty()
+                && ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme()));
     }
 
-    Response doHttp(@NonNull final Request request) throws ExecutionException, InterruptedException {
-        return executor.submit(new Callable<Response>() {
-            public Response call() throws IOException {
-                return httpClient.newCall(request).execute();
-            }
-        }).get();
+    Response doHttp(Request request) throws IOException {
+        Call call = CLIENT.newCall(request);
+        activeCall = call;
+        try {
+            if (cancelled || Thread.currentThread().isInterrupted()) call.cancel();
+            return call.execute();
+        } finally {
+            activeCall = null;
+        }
+    }
+
+    void cancel() {
+        cancelled = true;
+        Call call = activeCall;
+        if (call != null) call.cancel();
     }
 }

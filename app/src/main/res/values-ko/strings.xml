@@ -1,0 +1,23 @@
+<resources>
+
+    <string name="chooser_item_logo">표시된 앱의 로고</string>
+    <string name="remember_preference">선택 기억하기</string>
+    <string name="error_app_not_found">기억된 앱을 실행하지 못했습니다</string>
+    <string name="error_unsupported_link">지원하지 않는 링크입니다</string>
+
+    <string name="settings">설정</string>
+    <string name="pref_remember_selection_by_default">기본으로 선택 기억하기</string>
+    <string name="pref_remember_selection_by_default_on">선택한 앱을 기본으로 저장해 다음에 바로 사용합니다</string>
+    <string name="pref_remember_selection_by_default_off">선택을 저장하려면 먼저 \'선택 기억하기\'를 체크해야 합니다</string>
+
+    <string name="preferred_apps">기억된 앱</string>
+    <string name="manage_preferred_apps">기억된 앱 관리</string>
+    <string name="preferred_apps_empty_list">\"Choose Browser\"로 앱을 열 때 \'선택 기억하기\'를 체크하면 여기에 추가됩니다</string>
+
+    <string name="hidden_apps">숨긴 앱</string>
+    <string name="manage_hidden_apps">체크한 앱은 브라우저 목록에 표시되지 않습니다</string>
+    <string name="hidden_apps_empty_list">링크를 열 수 있는 앱이 없습니다</string>
+    <string name="chooser_loading">앱 목록을 불러오는 중…</string>
+    <string name="chooser_empty">이 링크를 열 수 있는 앱이 없습니다.</string>
+    <string name="chooser_load_failed">앱 목록을 불러오지 못했습니다. 화면을 닫고 다시 시도해 주세요.</string>
+</resources>

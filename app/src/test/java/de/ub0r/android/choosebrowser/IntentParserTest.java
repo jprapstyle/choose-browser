@@ -9,8 +9,32 @@ import org.robolectric.RobolectricTestRunner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+@org.robolectric.annotation.Config(sdk = 28)
 @RunWith(RobolectricTestRunner.class)
 public class IntentParserTest {
+
+    @Test public void nullTextIsRejected() { assertNull(new IntentParser().parseText(null)); }
+
+    @Test public void similarlyNamedGoogleHostIsNotRewritten() {
+        Uri uri = Uri.parse("https://notgoogle.com/url?q=https://example.com/path");
+        assertEquals(uri, new IntentParser().resolveRedirect(uri));
+    }
+
+    @Test public void unsafeGoogleDestinationIsNotAccepted() {
+        Uri uri = Uri.parse("https://google.com/url?q=javascript:alert(1)");
+        assertEquals(uri, new IntentParser().resolveRedirect(uri));
+    }
+
+    @Test public void parsesShortenerWithoutNetwork() {
+        IntentParser parser = new IntentParser() {
+            @Override okhttp3.Response doHttp(okhttp3.Request request) {
+                throw new AssertionError("parseIntent must not call the network");
+            }
+        };
+        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW,
+                Uri.parse("https://bit.ly/test"));
+        assertEquals("https://bit.ly/test", parser.parseIntent(intent).toString());
+    }
 
     private final IntentParser intentParser = new IntentParser();
 

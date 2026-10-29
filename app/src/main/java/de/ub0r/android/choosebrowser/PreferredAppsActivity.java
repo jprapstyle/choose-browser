@@ -17,6 +17,7 @@ public class PreferredAppsActivity extends AppCompatActivity implements Preferre
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferred_apps);
+        EdgeToEdge.applyInsets(this);
 
         //noinspection ConstantConditions
         getSupportActionBar().setSubtitle(R.string.preferred_apps);

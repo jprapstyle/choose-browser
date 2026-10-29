@@ -36,50 +36,14 @@ public class ChooserAdapter extends RecyclerView.Adapter<ChooserAdapter.ViewHold
 
     }
 
-    static class ContentHolder {
-        private final ResolveInfo mBrowser;
-        private CharSequence mLabel;
-        private Drawable mIcon;
-
-        ContentHolder(final ResolveInfo browser) {
-            mBrowser = browser;
-        }
-
-        CharSequence getLabel(final PackageManager pm) {
-            if (mLabel == null) {
-                mLabel = mBrowser.loadLabel(pm);
-            }
-            return mLabel;
-        }
-
-        Drawable getIcon(final PackageManager pm) {
-            if (mIcon == null) {
-                mIcon = mBrowser.loadIcon(pm);
-            }
-            return mIcon;
-        }
-
-        ComponentName getComponent() {
-            return new ComponentName(mBrowser.activityInfo.packageName, mBrowser.activityInfo.name);
-        }
-    }
-
     private final LayoutInflater mInflater;
-    private final PackageManager mPackageManager;
     private final OnItemClickListener mListener;
-    private final List<ContentHolder> mItems;
+    private final List<BrowserCatalog.Item> mItems;
 
-    ChooserAdapter(final Context context, final OnItemClickListener listener, final List<ResolveInfo> browsers) {
+    ChooserAdapter(final Context context, final OnItemClickListener listener, final List<BrowserCatalog.Item> browsers) {
         mInflater = LayoutInflater.from(context);
-        mPackageManager = context.getPackageManager();
         mListener = listener;
-        mItems = new ArrayList<>();
-        final String myPackageName = context.getPackageName();
-        for (ResolveInfo browser : browsers) {
-            if (!myPackageName.equals(browser.activityInfo.packageName)) {
-                mItems.add(new ContentHolder(browser));
-            }
-        }
+        mItems = browsers;
     }
 
     @Override
@@ -91,14 +55,14 @@ public class ChooserAdapter extends RecyclerView.Adapter<ChooserAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        final ContentHolder content = mItems.get(position);
-        holder.activityNameView.setText(content.getLabel(mPackageManager));
-        holder.iconView.setImageDrawable(content.getIcon(mPackageManager));
+        final BrowserCatalog.Item content = mItems.get(position);
+        holder.activityNameView.setText(content.label);
+        holder.iconView.setImageDrawable(content.icon);
         if (mListener != null) {
             holder.containerView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
-                    mListener.onItemClick(content.getComponent());
+                    mListener.onItemClick(content.component());
                 }
             });
         }

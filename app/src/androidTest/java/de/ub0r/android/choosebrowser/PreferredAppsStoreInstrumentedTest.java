@@ -3,11 +3,11 @@ package de.ub0r.android.choosebrowser;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.test.rule.ActivityTestRule;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.After;
-import org.junit.Rule;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -19,13 +19,11 @@ import static org.junit.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 public class PreferredAppsStoreInstrumentedTest {
 
-    @Rule
-    public ActivityTestRule<ChooserActivity> mActivityRule =
-            new ActivityTestRule<>(ChooserActivity.class);
+
 
     private SharedPreferences getPreferences() {
-        final SharedPreferences preferences = mActivityRule.getActivity()
-                .getSharedPreferences("test", Context.MODE_PRIVATE);
+        final SharedPreferences preferences = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getTargetContext()
+                .getSharedPreferences("choosebrowser_perf_tests", Context.MODE_PRIVATE);
         preferences.edit().clear().apply();
         return preferences;
     }

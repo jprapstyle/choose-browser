@@ -14,4 +14,11 @@
     <string name="preferred_apps">Preferred apps</string>
     <string name="manage_preferred_apps">Manage preferred apps</string>
     <string name="preferred_apps_empty_list">Start adding preferred apps when launching them via "Choose Browser"</string>
+
+    <string name="hidden_apps">Hidden apps</string>
+    <string name="manage_hidden_apps">Checked apps will not be shown in the browser list</string>
+    <string name="hidden_apps_empty_list">No apps found that can open links</string>
+    <string name="chooser_loading">Loading apps…</string>
+    <string name="chooser_empty">No apps can open this link.</string>
+    <string name="chooser_load_failed">Unable to load apps. Close this screen and try again.</string>
 </resources>

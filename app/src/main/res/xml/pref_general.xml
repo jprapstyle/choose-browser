@@ -8,10 +8,12 @@
         android:title="@string/pref_remember_selection_by_default" />
 
     <PreferenceScreen
+        android:key="preferred_apps"
         android:summary="@string/manage_preferred_apps"
-        android:title="@string/preferred_apps">
-        <intent
-            android:targetClass="de.ub0r.android.choosebrowser.PreferredAppsActivity"
-            android:targetPackage="de.ub0r.android.choosebrowser" />
-    </PreferenceScreen>
+        android:title="@string/preferred_apps" />
+
+    <PreferenceScreen
+        android:key="hidden_apps"
+        android:summary="@string/manage_hidden_apps"
+        android:title="@string/hidden_apps" />
 </PreferenceScreen>

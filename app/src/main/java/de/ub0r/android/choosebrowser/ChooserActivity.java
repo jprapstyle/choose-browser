@@ -27,19 +27,19 @@ public class ChooserActivity extends AppCompatActivity {
 
         if (uri == null) {
             Toast.makeText(this, R.string.error_unsupported_link, Toast.LENGTH_LONG).show();
-            finish();
-        } else if (!startPreferredApp(uri)) {
+            finishAndRemoveTask();
+        } else if (mParser.needsNetwork(uri) || !startPreferredApp(uri)) {
             showChooser(uri);
         }
     }
 
     private boolean startPreferredApp(@NonNull final Uri uri) {
         final ComponentName component = getPreferredApp(uri);
-        if (component != null) {
+        if (component != null && !getPackageName().equals(component.getPackageName())) {
             try {
                 startActivity(uri, component);
                 return true;
-            } catch (ActivityNotFoundException e) {
+            } catch (ActivityNotFoundException | SecurityException e) {
                 Log.e(TAG, "error starting app: ", component, e);
                 Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_LONG).show();
                 removePreferredApp(uri);
@@ -57,23 +57,25 @@ public class ChooserActivity extends AppCompatActivity {
     }
 
     private void showChooserAsDialog(@NonNull final Uri uri) {
-        ChooserFragment.newInstance(uri, true).show(getSupportFragmentManager(), "dialog");
+        if (getSupportFragmentManager().findFragmentByTag("dialog") == null)
+            ChooserFragment.newInstance(uri, true).show(getSupportFragmentManager(), "dialog");
     }
 
     private void showChooserFullscreen(@NonNull final Uri uri) {
         final Intent intent = new Intent(getIntent());
         intent.setClass(this, ChooserFullscreenActivity.class);
         intent.setData(uri);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-        finish();
+        finishAndRemoveTask();
     }
 
     private void startActivity(@NonNull final Uri uri, @NonNull final ComponentName component) {
         final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         intent.setComponent(component);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-        finish();
+        finishAndRemoveTask();
     }
 
     private ComponentName getPreferredApp(@NonNull final Uri uri) {

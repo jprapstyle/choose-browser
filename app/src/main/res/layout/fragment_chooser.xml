@@ -7,6 +7,14 @@
     android:orientation="vertical"
     tools:context="de.ub0r.android.choosebrowser.ChooserActivity">
 
+    <TextView
+        android:id="@+id/chooser_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:gravity="center"
+        android:text="@string/chooser_loading" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@android:id/list"
         android:layout_width="match_parent"

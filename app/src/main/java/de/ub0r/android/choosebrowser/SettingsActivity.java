@@ -1,6 +1,7 @@
 package de.ub0r.android.choosebrowser;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
 @SuppressLint("ExportedPreferenceActivity")
@@ -15,5 +16,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         getSupportActionBar().setSubtitle(R.string.settings);
         //noinspection deprecation
         addPreferencesFromResource(R.xml.pref_general);
+        EdgeToEdge.applyInsets(this);
+        // set in code: a hardcoded targetPackage would break the .alpha build type
+        //noinspection deprecation
+        findPreference("preferred_apps").setIntent(new Intent(this, PreferredAppsActivity.class));
+        //noinspection deprecation
+        findPreference("hidden_apps").setIntent(new Intent(this, HiddenAppsActivity.class));
     }
 }

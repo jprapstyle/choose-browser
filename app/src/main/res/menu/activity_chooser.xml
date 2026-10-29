@@ -11,4 +11,9 @@
         android:id="@+id/menu_preferred_apps"
         android:title="@string/preferred_apps"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_hidden_apps"
+        android:title="@string/hidden_apps"
+        app:showAsAction="never" />
 </menu>

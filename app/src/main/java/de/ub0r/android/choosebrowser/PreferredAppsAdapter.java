@@ -99,7 +99,8 @@ public class PreferredAppsAdapter extends RecyclerView.Adapter<PreferredAppsAdap
         final ArrayList<String> keys = new ArrayList<>(mStore.list());
         Collections.sort(keys);
         for (final String key : keys) {
-            mItems.add(new ContentHolder(key, mStore.get(key)));
+            ComponentName component = mStore.get(key);
+            if (component != null) mItems.add(new ContentHolder(key, component));
         }
     }
 
@@ -134,6 +135,7 @@ public class PreferredAppsAdapter extends RecyclerView.Adapter<PreferredAppsAdap
     }
 
     private void deleteItem(final int position) {
+        if (position == RecyclerView.NO_POSITION || position < 0 || position >= mItems.size()) return;
         final ContentHolder content = mItems.get(position);
         mStore.remove(content.getKey());
         mItems.remove(position);
